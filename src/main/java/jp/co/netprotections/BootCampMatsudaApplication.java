@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class BootCampMatsudaApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(BootCampMatsudaApplication.class, args);
-	}
+  public static void main(String[] args) {
+    SpringApplication.run(BootCampMatsudaApplication.class, args);
+  }
 }
