@@ -1,8 +1,5 @@
 package jp.co.netprotections.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -13,7 +10,7 @@ import jp.co.netprotections.dto.MemberRequestListDto;
 import jp.co.netprotections.dto.MemberResponseListDto;
 import jp.co.netprotections.dto.RequestDto;
 import jp.co.netprotections.dto.ResponseDto;
-import jp.co.netprotections.listToList.ListToList;
+import jp.co.netprotections.service.impl.MemberJudgeServiceImpl;
 
 /**
  * リクエストを処理するControllerクラスです.
@@ -36,54 +33,47 @@ public class MemberJudgeController {
           consumes = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public MemberResponseListDto execute(
-          @RequestBody MemberRequestListDto requestList) {
+        @RequestBody MemberRequestListDto requestList) {
 
-    MemberRequestListDto normalList = new MemberRequestListDto();
-    List<ResponseDto> abnormalList = new ArrayList<ResponseDto>();
     MemberResponseListDto finalResponseList = new MemberResponseListDto();
 
     if (requestList == null) {
       finalResponseList = null;
-    }
+    } else {
+      for (int i = 0; i < requestList.getMemberRequestList().size(); i++) {
+        RequestDto memberData = requestList.getMemberData(i);
+        MemberJudgeController requestMemberData = new MemberJudgeController();
+        boolean validationResult = requestMemberData.invalidCheck(memberData);
 
-    //for文を使ってリスト内の全データに不正チェックをかける
-    //各隊員データの不正チェックロジックは別メソッドで記述
-    for (int i = 0; i < requestList.getMemberRequestList().size(); i++) {
-      RequestDto memberData = requestList.getMemberData(i);;
-      MemberJudgeController requestMemberData = new MemberJudgeController();
-      boolean judgedMemberData = requestMemberData.invalidCheck(memberData);
-      //不正チェックの戻り値がfalse（不正）の場合はサービスロジックを介さずそのままabnormalListとして整形する
-      if (judgedMemberData == false) {
-        ResponseDto abnormalMemberData = new ResponseDto();
-        abnormalMemberData.setResponseMemberName(null);
-        abnormalMemberData.setEnlistedPropriety(false);
-        abnormalList.add(abnormalMemberData);
-      //正常なデータは入隊可否判断にかけるため、normalListに入れる
-      } else {
-        normalList.addMemberRequestList(memberData);;
+        if (validationResult == true) {
+          //正常なデータは入隊可否審査にかける
+          MemberJudgeServiceImpl beforeJudgeData = new MemberJudgeServiceImpl();
+          ResponseDto judgedData = beforeJudgeData.judge(memberData);
+          finalResponseList.addMemberResponseList(judgedData);
+        } else {
+          //不正チェックの戻り値がfalse（不正）のデータは名前をnull、審査結果falseを設定する
+          ResponseDto abnormalMemberData = new ResponseDto();
+          abnormalMemberData.setResponseMemberName(null);
+          abnormalMemberData.setEnlistedPropriety(false);
+          finalResponseList.addMemberResponseList(abnormalMemberData);
+        }
+
       }
-
     }
-
-    //normaListのみ入隊可否判断を適用
-    ListToList judgeList = new ListToList();
-    List<ResponseDto> judgedResponseList = judgeList.listToList(normalList);
-
-    finalResponseList.addAllMemberResponseList(judgedResponseList);
-    finalResponseList.addAllMemberResponseList(abnormalList);
-
 
     return finalResponseList;
 
   }
 
 
-  //不正チェック
-  //正常な（すべてのパラメータが揃った）隊員データが１つ以上存在している
-  //パラメータはint型で0~5の値のみ受け取れる
+  /**
+   * 隊員データのValidation実行のためのメソッドです
+   * @param RequestDto rq
+   * @return boolean true or false
+   */
   public boolean invalidCheck(RequestDto rq) {
 
-    if (rq.getMemberName() != null
+    if (rq.getMemberName() != null && rq.getMemberName().isEmpty() == false
         && rq.getEventPlanning() >= 0 && rq.getEventPlanning() <= 5
         && rq.getCogitation() >= 0 && rq.getCogitation() <= 5
         && rq.getCoordination() >= 0 && rq.getCoordination() <= 5

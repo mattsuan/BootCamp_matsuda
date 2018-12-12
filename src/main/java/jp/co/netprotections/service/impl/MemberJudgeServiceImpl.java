@@ -38,18 +38,21 @@ public class MemberJudgeServiceImpl implements MemberJudgeService {
   }
 
   /**
-  *
+  * 隊員パラメータの合計値算出メソッドです
   * @param i
   * @param j
   * @param k
   * @param l
   * @param m
-  * @return
+  * @return i + j + k + l + m
   */
- private int sumTotalValue(int i, int j, int k, int l, int m) {
-     return i + j + k + l + m;
- }
-
-
+  private int sumTotalValue(int i, int j, int k, int l, int m) {
+    return i + j + k + l + m;
+  }
 
 }
+
+
+
+
+
