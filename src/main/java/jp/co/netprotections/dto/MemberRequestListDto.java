@@ -7,10 +7,10 @@ public class MemberRequestListDto {
 
   private List<RequestDto> memberRequestList;
 
-//コンストラクタはテスト用、実際にSpringbootでリクエストするときは外す
-public MemberRequestListDto () {
+  //コンストラクタはテスト用、実際にSpringbootでリクエストするときは外す
+  public MemberRequestListDto() {
     memberRequestList = new ArrayList<RequestDto>();
-}
+  }
 
 
   public List<RequestDto> getMemberRequestList() {

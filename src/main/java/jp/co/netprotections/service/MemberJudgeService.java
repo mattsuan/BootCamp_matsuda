@@ -8,7 +8,6 @@ import jp.co.netprotections.dto.ResponseDto;
 @Service
 public interface MemberJudgeService {
 
-    public ResponseDto judge(RequestDto request);
-
+  public ResponseDto judge(RequestDto request);
 
 }

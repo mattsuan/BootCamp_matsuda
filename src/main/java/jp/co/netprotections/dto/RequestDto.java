@@ -1,5 +1,8 @@
 package jp.co.netprotections.dto;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class RequestDto {
 
   private String memberName;
