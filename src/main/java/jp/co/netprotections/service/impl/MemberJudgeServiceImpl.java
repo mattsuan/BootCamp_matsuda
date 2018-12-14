@@ -57,7 +57,7 @@ public class MemberJudgeServiceImpl implements MemberJudgeService {
   * @param m
   * @return i + j + k + l + m
   */
-  private int sumTotalValue(int i, int j, int k, int l, int m) {
+  public int sumTotalValue(int i, int j, int k, int l, int m) {
     return i + j + k + l + m;
   }
 

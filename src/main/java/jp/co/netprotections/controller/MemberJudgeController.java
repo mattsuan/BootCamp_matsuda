@@ -11,7 +11,7 @@ import jp.co.netprotections.dto.MemberRequestListDto;
 import jp.co.netprotections.dto.MemberResponseListDto;
 import jp.co.netprotections.dto.RequestDto;
 import jp.co.netprotections.dto.ResponseDto;
-import jp.co.netprotections.service.impl.MemberJudgeServiceImpl;
+import jp.co.netprotections.service.MemberJudgeService;
 
 /**
  * リクエストを処理するControllerクラスです.
@@ -21,22 +21,9 @@ import jp.co.netprotections.service.impl.MemberJudgeServiceImpl;
 @RestController
 public class MemberJudgeController {
 
-  //レスポンスのインスタンス作成
-  @Autowired
-  private MemberResponseListDto response;
-
-  //リストから取り出したメンバーの不正チェックを行うためのインスタンス作成
-  @Autowired
-  private MemberJudgeController rqMemberData;
-
   //入隊審査にかけるためのサービスクラスのインスタンス作成
   @Autowired
-  private MemberJudgeServiceImpl beforeJudgeData;
-
-  //不正チェックエラーが出たデータを処理するためのインスタンスを作成
-  @Autowired
-  private ResponseDto abnormalMemberData;
-
+  private MemberJudgeService memberJudgeService;
 
   /**
    * Controllerの実行メソッドです
@@ -48,6 +35,10 @@ public class MemberJudgeController {
   @ResponseBody
   public MemberResponseListDto execute(
         @RequestBody MemberRequestListDto requestList) {
+
+    //レスポンスのインスタンスを作成
+    MemberResponseListDto response = new MemberResponseListDto();
+
     //リストフィールドを持たないリクエストに対してnullを返す
     if (requestList == null) {
       response = null;
@@ -55,14 +46,15 @@ public class MemberJudgeController {
       //リクエストからメンバーのデータを取り出して、入力不正チェックにかける
       for (int i = 0; i < requestList.getMemberRequestList().size(); i++) {
         RequestDto memberData = requestList.getMemberData(i);
-        boolean validationResult = rqMemberData.invalidCheck(memberData);
 
-        if (validationResult == true) {
+        if (invalidCheck(memberData)) {
           //正常なデータは入隊可否審査にかける
-          ResponseDto judgedData = beforeJudgeData.judge(memberData);
+          ResponseDto judgedData = memberJudgeService.judge(memberData);
           response.addMemberResponseList(judgedData);
         } else {
           //入力不正チェックの戻り値がfalse（不正）のデータは名前をnull、審査結果falseを設定する
+          //不正チェックエラーが出たデータを処理するためのインスタンスを作成
+          ResponseDto abnormalMemberData = new ResponseDto();
           abnormalMemberData.setResponseMemberName(null);
           abnormalMemberData.setEnlistedPropriety(false);
           response.addMemberResponseList(abnormalMemberData);
@@ -74,7 +66,6 @@ public class MemberJudgeController {
     return response;
 
   }
-
 
   /**
    * 隊員データのValidation実行のためのメソッドです
